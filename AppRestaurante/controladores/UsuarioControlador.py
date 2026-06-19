@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, EmailStr
 from servicios.UsuarioServicio import UsuarioServicio
+import bcrypt
 
 # Creamos el router para agrupar las rutas de usuario
 router = APIRouter(
@@ -19,26 +20,63 @@ class LoginRequest(BaseModel):
     password: str
 
 
+class RegisterRequest(BaseModel):
+    email: EmailStr
+    password: str
+    nombre: str
+    nidtperfil: int
+
+
 # --- ENDPOINTS / RUTAS ---
 
 @router.post("/login", status_code=status.HTTP_200_OK)
 def login(datos: LoginRequest):
     """
     Endpoint para autenticar usuarios del restaurante.
-    Recibe el email y password, y retorna el objeto usuario junto con su JWT.
+    Actividad 2: La validación del password se realiza en el backend
+    con bcrypt, ya no en la base de datos.
     """
-    # Llamamos a tu servicio pasándole los datos ya validados por Pydantic
     resultado = usuario_servicio.login(datos.email, datos.password)
 
-    # Si las credenciales fallan o el usuario no existe, tu servicio retorna None
     if not resultado:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="El correo electrónico o la contraseña son incorrectos."
         )
 
-    # Si todo sale bien, retorna automáticamente el dict {"usuario": ..., "token": ...} con un código 200
-    return resultado
+    # Serializar el DTO a dict para la respuesta JSON
+    usuario = resultado["usuario"]
+    return {
+        "usuario": {
+            "cestado": usuario.cestado,
+            "nidtusuario": usuario.nidtusaurio,
+            "cemail": usuario.cemail,
+            "nidtperfil": usuario.nidtperfil,
+            "cnombre": usuario.cnombre,
+        },
+        "token": resultado["token"]
+    }
+
+
+@router.post("/registrar", status_code=status.HTTP_201_CREATED)
+def registrar(datos: RegisterRequest):
+    """
+    Endpoint para registrar un usuario con password hasheado (bcrypt).
+    El hash se genera en el backend antes de guardar en la BD.
+    """
+    hashed = bcrypt.hashpw(datos.password.encode("utf-8"), bcrypt.gensalt())
+    resultado = usuario_servicio.registrar_usuario(
+        email=datos.email,
+        password_hash=hashed.decode("utf-8"),
+        nombre=datos.nombre,
+        nidtperfil=datos.nidtperfil
+    )
+    if not resultado:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No se pudo registrar el usuario. Verifique que el email no esté en uso."
+        )
+    return {"mensaje": "Usuario registrado correctamente"}
 
 
 @router.get("/", status_code=status.HTTP_200_OK)

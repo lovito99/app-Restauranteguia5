@@ -1,11 +1,11 @@
 // src/App.tsx
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider, AuthContext } from "./context/AuthContext";
-import LoginPage from "./pages/LoginPage";
-import Dashboard from "./pages/Dashboard";
+import { AuthProvider, AuthContext } from "./context/AuthProvider";
+import LoginPage from "./paginas/loginpage";
+import Dashboard from "./paginas/Dashboard";
 import { useContext } from "react";
 
-function PrivateRoute({ children }: { children: JSX.Element }) {
+function PrivateRoute({ children }: { children: React.ReactNode }) {
   const { token } = useContext(AuthContext);
   return token ? children : <Navigate to="/login" />;
 }

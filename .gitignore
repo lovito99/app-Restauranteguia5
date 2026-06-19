@@ -1,0 +1,26 @@
+# ===== Frontend (React / Vite) =====
+sistemarestaurante/node_modules/
+sistemarestaurante/dist/
+sistemarestaurante/dist-ssr/
+sistemarestaurante/*.local
+
+# ===== Backend (Python / FastAPI) =====
+AppRestaurante/__pycache__/
+AppRestaurante/**/__pycache__/
+AppRestaurante/.idea/
+*.pyc
+*.pyo
+.env
+
+# ===== Logs =====
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# ===== Lock files =====
+package-lock.json
+
+# ===== OS =====
+.DS_Store
+Thumbs.db

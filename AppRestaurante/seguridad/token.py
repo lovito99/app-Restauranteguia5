@@ -2,8 +2,7 @@
 import jwt
 from datetime import datetime, timedelta
 from modelos.usuariodto import CUsuarioDTO
-
-SECRET_KEY = "clave_super_secreta"  # usar variable de entorno
+from resources.config import SECRET_KEY
 
 def generar_token(usuario:CUsuarioDTO):
     payload = {
